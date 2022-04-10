@@ -1,0 +1,690 @@
+<Window
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Window" Title="Greg's ClipTool" ShowInTaskbar="True" 
+    ResizeMode="CanResizeWithGrip" AllowsTransparency="True" WindowStyle="None" Margin="0"
+    Width="400" Height="450">
+    <Window.Resources>
+		<SolidColorBrush x:Key="StandardBorderBrush" Color="#888" />
+		<SolidColorBrush x:Key="StandardBackgroundBrush" Color="Black" />
+		<SolidColorBrush x:Key="HoverBorderBrush" Color="#DDD" />
+		<SolidColorBrush x:Key="SelectedBackgroundBrush" Color="Gray" />
+		<SolidColorBrush x:Key="SelectedForegroundBrush" Color="White" />
+		<SolidColorBrush x:Key="DisabledForegroundBrush" Color="#888" />
+		<SolidColorBrush x:Key="GlyphBrush" Color="#444" />
+		<SolidColorBrush x:Key="NormalBrush" Color="#888" />
+		<SolidColorBrush x:Key="NormalBorderBrush" Color="#888" />
+		<SolidColorBrush x:Key="HorizontalNormalBrush" Color="#FF686868" />
+		<SolidColorBrush x:Key="HorizontalNormalBorderBrush" Color="#888" />
+
+		<LinearGradientBrush x:Key="ListBoxBackgroundBrush" StartPoint="0,0" EndPoint="1,0.001">
+			<GradientBrush.GradientStops>
+				<GradientStopCollection>
+					<GradientStop Color="White" Offset="0.0" />
+					<GradientStop Color="White" Offset="0.6" />
+					<GradientStop Color="#DDDDDD" Offset="1.2"/>
+				</GradientStopCollection>
+			</GradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="StandardBrush" StartPoint="0,0" EndPoint="0,1">
+			<GradientBrush.GradientStops>
+				<GradientStopCollection>
+					<GradientStop Color="#FFF" Offset="0.0"/>
+					<GradientStop Color="#CCC" Offset="1.0"/>
+				</GradientStopCollection>
+			</GradientBrush.GradientStops>
+		</LinearGradientBrush>
+		<LinearGradientBrush x:Key="PressedBrush" StartPoint="0,0" EndPoint="0,1">
+			<GradientBrush.GradientStops>
+				<GradientStopCollection>
+					<GradientStop Color="#BBB" Offset="0.0"/>
+					<GradientStop Color="#EEE" Offset="0.1"/>
+					<GradientStop Color="#EEE" Offset="0.9"/>
+					<GradientStop Color="#FFF" Offset="1.0"/>
+				</GradientStopCollection>
+			</GradientBrush.GradientStops>
+		</LinearGradientBrush>
+
+	    <Style x:Key="ScrollBarLineButton" TargetType="{x:Type RepeatButton}">
+			<Setter Property="OverridesDefaultStyle" Value="true"/>
+			<Setter Property="Focusable" Value="false"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type RepeatButton}">
+						<Border Name="Border" BorderBrush="{StaticResource NormalBorderBrush}" BorderThickness="0">
+							<Path HorizontalAlignment="Center" VerticalAlignment="Center" Fill="{StaticResource GlyphBrush}" Data="{Binding Path=Content, RelativeSource={RelativeSource TemplatedParent}}" />
+						</Border>
+						<ControlTemplate.Triggers>
+							<Trigger Property="IsPressed" Value="true">
+								<Setter TargetName="Border" Property="Background" Value="{StaticResource PressedBrush}" />
+							</Trigger>
+							<Trigger Property="IsEnabled" Value="false">
+								<Setter Property="Foreground" Value="{StaticResource DisabledForegroundBrush}"/>
+							</Trigger>
+						</ControlTemplate.Triggers>
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		<Style x:Key="ScrollBarPageButton" TargetType="{x:Type RepeatButton}">
+			<Setter Property="SnapsToDevicePixels" Value="True"/>
+			<Setter Property="OverridesDefaultStyle" Value="true"/>
+			<Setter Property="IsTabStop" Value="false"/>
+			<Setter Property="Focusable" Value="false"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type RepeatButton}">
+						<Border Background="#7CCC" />
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+
+		<Style x:Key="ScrollBarThumb" TargetType="{x:Type Thumb}">
+			<Setter Property="OverridesDefaultStyle" Value="true"/>
+			<Setter Property="IsTabStop" Value="false"/>
+			<Setter Property="Focusable" Value="false"/>
+			<Setter Property="Template">
+				<Setter.Value>
+					<ControlTemplate TargetType="{x:Type Thumb}">
+						<Border CornerRadius="2" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  />
+					</ControlTemplate>
+				</Setter.Value>
+			</Setter>
+		</Style>
+		
+		<ControlTemplate x:Key="VerticalScrollBar" TargetType="{x:Type ScrollBar}">
+			<Grid>
+				<Grid.RowDefinitions>
+					<RowDefinition MaxHeight="7"/>
+					<RowDefinition Height="0.00001*"/>
+					<RowDefinition MaxHeight="7"/>
+				</Grid.RowDefinitions>
+				<Border Grid.RowSpan="3" Background="Transparent" />
+		<RepeatButton Grid.Row="0" Style="{StaticResource ScrollBarLineButton}" Height="7" Command="ScrollBar.LineUpCommand" Content="M 0 4 L 8 4 L 4 0 Z" />
+		<Track Name="PART_Track" Grid.Row="1" IsDirectionReversed="true">
+			<Track.DecreaseRepeatButton>
+				<RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageUpCommand" />
+			</Track.DecreaseRepeatButton>
+			<Track.Thumb>
+				<Thumb Style="{StaticResource ScrollBarThumb}" Background="{StaticResource HorizontalNormalBrush}" BorderBrush="{StaticResource HorizontalNormalBorderBrush}" />
+			</Track.Thumb>
+			<Track.IncreaseRepeatButton>
+				<RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageDownCommand" />
+					</Track.IncreaseRepeatButton>
+				</Track>
+				<RepeatButton Grid.Row="3" Style="{StaticResource ScrollBarLineButton}" Height="7" Command="ScrollBar.LineDownCommand" Content="M 0 0 L 4 4 L 8 0 Z"/>
+			</Grid>
+		</ControlTemplate>
+		<ControlTemplate x:Key="HorizontalScrollBar" TargetType="{x:Type ScrollBar}">
+			<Grid>
+				<Grid.ColumnDefinitions>
+					<ColumnDefinition MaxWidth="7"/>
+					<ColumnDefinition Width="0.00001*"/>
+					<ColumnDefinition MaxWidth="7"/>
+				</Grid.ColumnDefinitions>
+				<Border Grid.ColumnSpan="3" Background="#F0F0F0"/>
+				<RepeatButton Grid.Column="0"  Style="{StaticResource ScrollBarLineButton}" Width="7" Command="ScrollBar.LineLeftCommand" Content="M 4 0 L 4 8 L 0 4 Z" />
+				<Track Name="PART_Track" Grid.Column="1" IsDirectionReversed="False">
+					<Track.DecreaseRepeatButton>
+						<RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageLeftCommand" />
+					</Track.DecreaseRepeatButton>
+					<Track.Thumb>
+						<Thumb Style="{StaticResource ScrollBarThumb}" Background="{StaticResource NormalBrush}" BorderBrush="{StaticResource NormalBorderBrush}" />
+					</Track.Thumb>
+					<Track.IncreaseRepeatButton>
+						<RepeatButton Style="{StaticResource ScrollBarPageButton}" Command="ScrollBar.PageRightCommand" />
+					</Track.IncreaseRepeatButton>
+				</Track>
+				<RepeatButton Grid.Column="3" Style="{StaticResource ScrollBarLineButton}" Width="7" Command="ScrollBar.LineRightCommand" Content="M 0 0 L 4 4 L 0 8 Z"/>
+			</Grid>
+		</ControlTemplate>
+		<Style x:Key="{x:Type ScrollBar}" TargetType="{x:Type ScrollBar}">
+			<Setter Property="SnapsToDevicePixels" Value="True"/>
+			<Setter Property="OverridesDefaultStyle" Value="true"/>
+			<Style.Triggers>
+				<Trigger Property="Orientation" Value="Horizontal">
+			        <Setter Property="Width" Value="Auto"/>
+			        <Setter Property="Height" Value="7" />
+			        <Setter Property="MinHeight" Value="7" />
+			        <Setter Property="MaxHeight" Value="7" />
+					<Setter Property="Template" Value="{StaticResource HorizontalScrollBar}" />
+				</Trigger>
+				<Trigger Property="Orientation" Value="Vertical">
+			        <Setter Property="Width" Value="7"/>
+			        <Setter Property="MaxWidth" Value="7"/>
+			        <Setter Property="MinWidth" Value="7"/>
+			        <Setter Property="Height" Value="Auto" />
+					<Setter Property="Template" Value="{StaticResource VerticalScrollBar}" />
+				</Trigger>
+			</Style.Triggers>
+		</Style>
+		
+		
+    </Window.Resources>
+    <Border BorderBrush="Black" BorderThickness="1">
+    <Grid Name="Frame" >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" Name="ClipGridRow" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.Resources>
+            <Style x:Key="AlternatingRowStyle" TargetType="{x:Type Control}" >
+                <Setter Property="Background" Value="#EEEEEE"/>
+                <Setter Property="Foreground" Value="Black"/>
+                <Style.Triggers>
+                    <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                        <Setter Property="Background" Value="White"/>
+                        <Setter Property="Foreground" Value="Black"/>
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Grid.Resources>
+        <Grid x:Name="TitleBar" Background="#77FFFFFF">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Orientation="Horizontal"  Name="TitleLeft">
+                <Label FontSize="18" Padding="0" Margin="0">
+                <Label.Effect>
+                <DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
+                      Color="White"/>
+                </Label.Effect>
+                    &#x2701;&#x1F4CB;
+                </Label>
+				<Label Content="{Binding Title,RelativeSource={RelativeSource FindAncestor,AncestorType=Window}}">
+				<Label.Effect>
+				<DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
+						Color="White"/>
+				</Label.Effect>
+				</Label>
+            </StackPanel>
+            <StackPanel Name="TitleStatus" Grid.Column="2" Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="Background" Value="#0FFF" />
+                        <Setter Property="BorderBrush" Value="#3777" />
+                        <Setter Property="BorderThickness" Value="1" />
+                        <Setter Property="Margin" Value="2" />
+						<Setter Property="Width" Value="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}" />
+                        <Setter Property="VerticalAlignment" Value="Center" />
+                    </Style>
+                </StackPanel.Resources>
+				<TextBlock Text="Delim: &apos;" VerticalAlignment="Center" ToolTip="Delimiter used for various split and join operations. Change the delimiter in Settings > Copy Options or by using the Delimiter Actions." />
+				<TextBlock Name="tb_delimstatus" Text="{Binding ElementName=tbu_Delimiter, Path=Text}" VerticalAlignment="Center" />
+				<TextBlock Text="&apos; " VerticalAlignment="Center" />
+                <Button x:Name="TopStatusButton" Content="-" />
+                <Button x:Name="CollapseStatusButton" Content="-" />
+			</StackPanel>
+            <StackPanel Grid.Column="3" Orientation="Horizontal">
+                <StackPanel.Resources>
+                    <Style TargetType="Button">
+                        <Setter Property="BorderThickness" Value="0" />
+                        <Setter Property="Margin" Value="1,0" />
+                        <Setter Property="Padding" Value="4,0" />
+                        <Setter Property="Background" Value="#CCFFFFFF" />
+                    </Style>
+                </StackPanel.Resources>
+                <Button x:Name="MinButton" Content="&#x1F5D5;" />
+                <Button x:Name="MaxButton" Content="&#x1F5D6;" />
+                <Button x:Name="CloseButton" Content="&#x2716;" />
+            </StackPanel>
+        </Grid>
+        <Menu Name="MenuBar" Width="Auto" HorizontalAlignment="Stretch" Grid.Row="1">
+         <Menu.Background>
+            <LinearGradientBrush StartPoint='0,0' EndPoint='0,1'>
+                <LinearGradientBrush.GradientStops> 
+                <GradientStop Color='#77000000' Offset='0' /> 
+                <GradientStop Color='#77FFFFFF' Offset='0.2' /> 
+                <GradientStop Color='#77CCCCCC' Offset='0.9' /> 
+                <GradientStop Color='#77000000' Offset='1' /> 
+                </LinearGradientBrush.GradientStops>
+            </LinearGradientBrush>
+        </Menu.Background>
+           <MenuItem x:Name='FileMenu' Header='_File'>
+                <MenuItem x:Name='Clear_Menu' Header='_Clear All' />
+                <MenuItem x:Name='ReturnDock_Menu' Header='Return to _Dock' 
+					ToolTip="Return window to its Dock position"/>
+                <MenuItem x:Name='NewAction_Menu' Header='_New Action'
+					ToolTip="Create a new Action button"/>
+                <MenuItem x:Name='LoadAction_Menu' Header='_Load Actions' />
+                <MenuItem x:Name='SaveAction_Menu' Header='Save _Actions' />
+                <MenuItem x:Name='SaveSettings_Menu' Header='_Save Settings' />
+                <MenuItem x:Name='ExitWithoutSave_Menu' Header='E_xit Without Save' />
+            </MenuItem>
+           <MenuItem x:Name='ClipMenu' Header='_Clip'>
+                <MenuItem x:Name='Favorite_Menu' Header='_Favorite' />
+                <MenuItem x:Name='Template_Menu' Header='_Make Template' />
+                <Separator />
+                <MenuItem x:Name='Sanitize_Menu' Header='_Sanitize' />
+                <MenuItem x:Name='Uppercase_Menu' Header='_UPPERCASE' />
+                <MenuItem x:Name='Lowercase_Menu' Header='_lowercase' />
+                <MenuItem x:Name='TitleCase_Menu' Header='_Title Case' />
+                <MenuItem x:Name='Trim_Menu' Header='T_rim' />
+                <Separator />
+                <MenuItem x:Name='SplitLines_Menu' Header='S_plit Lines' />
+				<MenuItem x:Name='SplitDelim_Menu' ToolTip="Change delimiter under Settings">
+					<MenuItem.Header>
+						<StackPanel Orientation="Horizontal">
+						<TextBlock Text="Split on Delimiter &apos;"/>
+						<TextBlock Text="{Binding  ElementName=tbu_Delimiter, Path=Text}"/>
+						<TextBlock Text="&apos;"/>
+						</StackPanel>
+					</MenuItem.Header>
+				</MenuItem>
+                <MenuItem x:Name='ParseValues_Menu' Header='Parse Template _Values' />
+            </MenuItem>
+        </Menu>
+		<StackPanel Name="ClipboardLabel" Orientation="Horizontal" Grid.Row="2">
+			<Label FontWeight="Bold" Padding="2,0">
+			<Label.Effect>
+			<DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
+					Color="White"/>
+			</Label.Effect>
+				Current Clipboard Contents:
+			</Label>
+			<Label Name="ClipStatus" Padding="0" VerticalAlignment="Bottom" />
+			<Button Name="ClipTrim" Padding="0" BorderThickness="0" Background="#0FFF" VerticalAlignment="Bottom" Content="_" />
+		</StackPanel>
+        <TextBox Name="CurrentClipBox" Margin="2"  Grid.Row="3" TextWrapping="Wrap" AcceptsReturn="True" 
+            HorizontalAlignment="Stretch" VerticalAlignment="Stretch" VerticalScrollBarVisibility="Auto" />
+        <GridSplitter Name="ToolBoxDivider" Grid.Row="4" HorizontalAlignment="Stretch" Height="{Binding ElementName=tbu_SplitterSize,Path=Text}" Background="#9000" />
+        <Grid Grid.Row="5" Name="ToolBox">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" Name="ActionColumn" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+				<Grid Name="ActionLabel">
+					<Grid.ColumnDefinitions>
+						<ColumnDefinition Width="*" />
+						<ColumnDefinition Width="Auto" />
+					</Grid.ColumnDefinitions>
+					<Label Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Center">
+					<Label.Effect>
+					<DropShadowEffect BlurRadius="10" ShadowDepth="0" Opacity="1" 
+							Color="White"/>
+					</Label.Effect>
+						Actions
+					</Label>
+	                <Button x:Name="ActionLockButton"  Grid.Column="1" Content=" " Background="#0FFF" BorderThickness="0" Margin="2" Width="{Binding Path=ActualHeight, RelativeSource={RelativeSource Self}}" VerticalAlignment="Center" />
+				</Grid>
+                <ScrollViewer Grid.Row="2" Margin="0,0,1,0" VerticalScrollBarVisibility="Auto">
+                    <WrapPanel Name="ActionBox">
+                        <WrapPanel.Resources>
+                            <Style TargetType="Button">
+                                <Setter Property="Margin" Value="2" />
+                                <Setter Property="Padding" Value="4,0" />
+                            </Style>
+                        </WrapPanel.Resources>
+                    </WrapPanel>
+                </ScrollViewer>
+            </Grid>
+            <GridSplitter Name="ActionDivider" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Stretch" 
+                        Width="{Binding ElementName=tbu_SplitterSize,Path=Text}" Background="#9000" />
+            <TabControl Name="TabControl" Grid.Column="2" Margin="2" Background="#99FFFFFF">
+                <TabItem Header="History" Name="HistoryTab">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+							<RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="History Filter" Grid.Row="0">
+                            <TextBox x:Name="HistoryFilterBox" Height="25" />
+                        </GroupBox>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" 
+                            Grid.Row="1" Height="Auto">
+                            <ListBox x:Name="HistoryBox" AlternationCount="2" 
+                                ItemContainerStyle="{StaticResource AlternatingRowStyle}" SelectionMode="Extended">
+                            <ListBox.Template>
+                                <ControlTemplate TargetType="ListBox">
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderBrush}">
+                                        <ItemsPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </ListBox.Template>
+                            <ListBox.ContextMenu>
+                                <ContextMenu x:Name="HistoryContextMenu">
+                                    <MenuItem x:Name='ClearHistory_Menu' Header='Clear History'/>      
+                                    <MenuItem x:Name='Copy_Menu' Header='Copy Selected'/>      
+                                    <MenuItem x:Name='FavoriteHistory_Menu' Header='Favorite Selected'/>      
+                                    <MenuItem x:Name='JoinHistory_Menu' ToolTip="Change delimiter under Settings"
+										Header='Join Selected with Delimiter' />
+                                    <MenuItem x:Name='MoveSelected_Menu' Header='Move Selected to End'/>  
+                                    <MenuItem x:Name='Remove_Menu' Header='Remove Selected'/>  
+                                </ContextMenu>
+                            </ListBox.ContextMenu>
+                            </ListBox>
+                        </ScrollViewer>
+						<TextBox Grid.Row="2" x:Name="HistoryStatus" BorderThickness="0 1 0 0" IsEnabled="False" />
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Fields" Name="FieldsTab" Visibility="Collapsed">
+					<Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+						<StackPanel Name="dgfilter" Orientation="Horizontal">
+							<TextBox Name="dgf_Name" Width="{Binding ElementName=dgtc_Name,Path=ActualWidth}" Margin="1 0 0 0" />
+							<TextBox Name="dgf_Value" Width="{Binding ElementName=dgtc_Value,Path=ActualWidth}" />
+							<TextBox Name="dgf_Comments" Width="{Binding ElementName=dgtc_Comments,Path=ActualWidth}" />
+						</StackPanel>
+						<DataGrid Name="Datagrid" AutoGenerateColumns="False" HeadersVisibility="Column" Grid.Row="1"
+							 CanUserAddRows="False" CanUserDeleteRows="False" Background="#0000">
+							<DataGrid.Columns>
+								<DataGridTextColumn x:Name="dgtc_Name" Header="Name" Binding="{Binding Name}"/>
+								<DataGridTextColumn x:Name="dgtc_Value" Header="Value" Binding="{Binding Value}"/>
+								<DataGridTextColumn x:Name="dgtc_Comments" Header="Comments" Binding="{Binding Comments}" Width="*"/>
+							</DataGrid.Columns>
+							<DataGrid.ContextMenu>
+								<ContextMenu>
+									<MenuItem x:Name="dgcm_ClearAll" Header="Clear all fields" />
+									<MenuItem x:Name="dgcm_Filter" Header="Show Filter Row" IsChecked="True" />
+									<MenuItem x:Name="dgcm_ReplaceSelectedPlain" Header="Replace Selected in Clip (Plain)" />
+									<MenuItem x:Name="dgcm_ReplaceSelectedRegEx" Header="Replace Selected in Clip (RegEx)" />
+									<MenuItem x:Name="dgcm_RemoveSelected" Header="Remove Selected" />
+								</ContextMenu>
+							</DataGrid.ContextMenu>
+						</DataGrid>
+						<DockPanel Grid.Row="2" Margin="0,2,0,0" Visibility="Collapsed">
+							<Button Name="FieldClearFieldButton" Content="Clear" DockPanel.Dock="Right" />
+							<Button Name="FieldFilterButton" Content=" Show Filter" DockPanel.Dock="Left" />
+							<Label />
+						</DockPanel>
+					</Grid>
+				</TabItem>
+                <TabItem Header="Edit Action" Name="EditActionTab" Visibility="Collapsed">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel>
+                            <StackPanel.Resources>
+                                <Style TargetType="Label">
+                                    <Setter Property="Padding" Value="2,0" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <Label Grid.Column="0">Name:</Label>
+                                <TextBox Grid.Column="1" Name="tbact_Content" 
+                                    ToolTip="Action button label. First underscore(_) creates Alt key shortcut." />
+                                <Label Grid.Column="2" ToolTip="(Not implimented yet.)">Shortcut:</Label>
+                                <TextBox Grid.Column="3" Name="tbhk_Hotkey" Width="30" 
+                                     ToolTip="(Not implimented yet.)" IsEnabled="False" />
+                            </Grid>
+                            <Label Height="2" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid ToolTip="Action button group name">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label Grid.Column="0">Group:</Label>
+                                    <TextBox Grid.Column="1" Name="tbact_Group" HorizontalAlignment="Stretch" />
+                                </Grid>
+                                <Grid Grid.Column="1" ToolTip="Button color: May be any valid color name, RGB, or ARGB color code">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="Auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label>Color:</Label>
+                                    <TextBox Grid.Column="1" Name="tbact_Background" HorizontalAlignment="Stretch" 
+                                        ToolTip="Color code" />
+                                    <Label Grid.Column="2" Background="{Binding ElementName=tbact_Background,Path=Text}" 
+                                        BorderBrush="{Binding ElementName=tbact_Background,Path=BorderBrush}"
+                                        Width="{Binding RelativeSource={RelativeSource Self}, Path=ActualHeight}" 
+                                        BorderThickness="1" ToolTip="Color preview" /> 
+                                </Grid>
+                            </Grid>
+                            <Label Height="2" />
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Grid ToolTip="Button width. Enter 'NaN' to allow button to size to text.">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label>Width:</Label>
+                                    <TextBox Grid.Column="1" Name="tbact_Width" HorizontalAlignment="Stretch" 
+                                        VerticalAlignment="Stretch"/>
+                                </Grid>
+                                <Grid ToolTip="Button height. Enter 'NaN' to allow button to size to text."
+									Grid.Column="1">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label>Height:</Label>
+                                    <TextBox Grid.Column="1" Name="tbact_Height" HorizontalAlignment="Stretch"/>
+                                </Grid>
+                            </Grid>
+                            <GroupBox Name="gbact_Desc" Header="Description"
+								 ToolTip="Descriptive text for button ToolTip">
+                                <TextBox Name="tbact_ToolTip" TextWrapping="Wrap" AcceptsReturn="True" 
+                                    HorizontalAlignment="Stretch" VerticalScrollBarVisibility="Auto" 
+									MaxHeight="44"/>
+                            </GroupBox>
+                        </StackPanel>
+                        <GroupBox Header="Script" Grid.Row="1" 
+							ToolTip="PowerShell code to execute when action button is clicked">
+                            <TextBox Name="tbact_Tag" TextWrapping="Wrap" AcceptsReturn="True" 
+                                HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                                VerticalScrollBarVisibility="Auto"/>
+                        </GroupBox>
+						<DockPanel Grid.Row="2">
+							<DockPanel.Resources>
+								<Style TargetType="Button" >
+									<Setter Property="BorderThickness" Value="1" />
+									<Setter Property="Margin" Value="1,0,0,0" />
+									<Setter Property="Padding" Value="4,0" />
+								</Style>
+							</DockPanel.Resources>
+							<Button x:Name="CloseEditActionButton" DockPanel.Dock="Right" Content="Close" ToolTip="Close the Edit Action tab" />
+							<Button x:Name="ApplyEditActionButton" DockPanel.Dock="Right" Content="Apply" ToolTip="Apply changes" />
+							<Button x:Name="AcceptEditActionButton" DockPanel.Dock="Right" Content="Accept" ToolTip="Accept changes and close the Edit Action tab" />
+							<Button x:Name="CopyEditActionButton" DockPanel.Dock="Left" Content="Copy" ToolTip="Make a copy of this action." />
+							<Button x:Name="MoveUpEditActionButton" DockPanel.Dock="Left" Content="&#x2303;" ToolTip="Move action up in current group" />
+							<Button x:Name="MoveDownEditActionButton" DockPanel.Dock="Left" Content="&#x2304;" ToolTip="Move action down in current group" />
+							<Label />
+						</DockPanel>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="System Messages" Name="SystemTab">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+                        <GroupBox Header="System Message Filter" Grid.Row="0">
+                            <TextBox x:Name="SystemFilterBox" Height="25" />
+                        </GroupBox>
+                        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto" 
+                            Grid.Row="1" Height="Auto">
+                            <ListBox x:Name="SystemBox" AlternationCount="2" 
+                                ItemContainerStyle="{StaticResource AlternatingRowStyle}" SelectionMode="Extended">
+                            <ListBox.Template>
+                                <ControlTemplate TargetType="ListBox">
+                                    <Border BorderBrush="{TemplateBinding BorderBrush}" 
+                                        BorderThickness="{TemplateBinding BorderBrush}">
+                                        <ItemsPresenter/>
+                                    </Border>
+                                </ControlTemplate>
+                            </ListBox.Template>
+                            </ListBox>
+                        </ScrollViewer>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Clip Details" Name="ClipDetailsTab" Visibility="Collapsed">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="ClipDetailsBox">
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Settings">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel x:Name="SettingsBox">
+                            <StackPanel.Resources>
+                                <Style TargetType="CheckBox">
+                                    <Setter Property="Margin" Value="5,5,0,0" />
+                                </Style>
+                            </StackPanel.Resources>
+                            <GroupBox Header="Copy Options">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" 
+										ToolTip="RegEx expression used for Split/Join operations">
+                                        <TextBox x:Name="tbu_Delimiter" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label Content="Delimiter"/>
+                                    </StackPanel>
+                                    <CheckBox x:Name="cb_CopyHistoryOnClick" 
+                                        Content="Copy History entry on click" />
+                                    <CheckBox x:Name="cb_MetaCopy" 
+                                        Content="Cut/Copy in Clip Box without overwrite" />
+                                    <CheckBox x:Name="cb_AllowActionDragDrop" 
+                                        Content="Allow Action drag &amp; drop reordering" />
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Window" Name="WindowGroup">
+                                <StackPanel Visibility="Collapsed">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_X" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> , </Label>
+                                        <TextBox x:Name="tbu_Y" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> Window Position</Label>
+                                        <StackPanel x:Name="DisplayPositionBox" Orientation="Horizontal">
+                                            <Label Padding="5,5,0,5">(</Label>
+                                            <Label Padding="0,5" Content="{Binding ElementName=Window,Path=Left}" />
+                                            <Label Padding="0,5">,</Label>
+                                            <Label Padding="0,5" Content="{Binding ElementName=Window,Path=Top}" />
+                                            <Label Padding="0,5">)</Label>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_Width" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> , </Label>
+                                        <TextBox x:Name="tbu_Height" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> Window Size</Label>
+                                        <StackPanel x:Name="DisplaySizeBox" Orientation="Horizontal">
+                                            <Label Padding="5,5,0,5">(</Label>
+                                            <Label Padding="0,5" Content="{Binding ElementName=Window,Path=Width}" />
+                                            <Label Padding="0,5">,</Label>
+                                            <Label Padding="0,5" Content="{Binding ElementName=Window,Path=Height}" />
+                                            <Label Padding="0,5">)</Label>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_SplitterSize" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" Text="3"/>
+                                        <Label> Splitter Size (in pixels)</Label>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_ClipHeight" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> Current ClipBox height</Label>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_ActionWidth" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> Action panel width</Label>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_WindowBackground" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label> Window Background</Label>
+                                    </StackPanel>
+                                    <CheckBox x:Name="cb_AlwaysOnTop" Content="Always on top" 
+                                        IsChecked="{Binding Path=Topmost, 
+                                        RelativeSource={RelativeSource AncestorType={x:Type Window}}}" />
+                                    <CheckBox x:Name="cb_HideTitleStatus" 
+                                        Content="Hide Title Status Display" />
+                                    <CheckBox x:Name="cb_HideMenu" 
+                                        Content="Hide Menu" />
+                                    <CheckBox x:Name="cb_HideClipLabel" 
+                                        Content="Hide Clip Label" />
+                                    <CheckBox x:Name="cb_HideActionLabel" 
+                                        Content="Hide Action Label" />
+									<CheckBox x:Name="cb_HideTemplateFields" 
+                                        Content="Hide Fields Tab" />
+									<CheckBox x:Name="cb_HideClipDetails" 
+                                        Content="Hide Clip Details Tab" />
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Mouse Hover" Name="MouseGroup">
+                                <StackPanel Visibility="Collapsed">
+                                    <CheckBox x:Name="cb_CollapseOnMouseLeave" 
+                                        Content="Collapse when mouse leaves window" />
+                                    <CheckBox x:Name="cb_CollapseToTitle" 
+                                        Content="Collapse to Title" />
+                                    <CheckBox x:Name="cb_BringToFrontOnMouseEnter" 
+                                        Content="Bring to front when mouse enters window" />
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_CollapseDelay" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label>Delay before collapsing window (in seconds)</Label>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_OpacityOnMouseEnter" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label>Opacity on mouse enter</Label>
+                                    </StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBox x:Name="tbu_OpacityOnMouseLeave" Width="50" 
+                                            Height="Auto" VerticalAlignment="Center" />
+                                        <Label>Opacity on mouse leave</Label>
+                                    </StackPanel>
+                                </StackPanel>
+                            </GroupBox>
+                            <GroupBox Header="Debug">
+                                <StackPanel Visibility="Collapsed">
+                                    <CheckBox x:Name="cb_HideSystemMessages" 
+                                        Content="Hide the System Messages Tab" />
+                                    <CheckBox x:Name="cb_DebugToConsole" 
+                                        Content="Write system messages to console" />
+                                    <CheckBox x:Name="cb_DebugToFile" 
+                                        Content="Write system messages to log file" />
+                                </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
+        </Grid>
+    </Grid>
+</Border>
+</Window>
