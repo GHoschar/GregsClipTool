@@ -616,7 +616,7 @@ $allowedCommands += 'Enable-CollapsibleElement'
 Function Get-ActionFileName {
     Param($element = $null)
     $SaveFileDialog = New-Object System.Windows.Forms.SaveFileDialog
-    $SaveFileDialog.Title = "Save ClipTool Action File"
+    $SaveFileDialog.Title = "Save GregsClipTool Action File"
     $elemName = ''
     if($element) {
         # TODO: update to allow for saving individual buttons
@@ -1891,7 +1891,7 @@ $JoinHistory_Menu.Add_Click({
 $LoadAction_Menu.Add_Click({
     Confirm-MenuHidden
     $OpenFileDialog = New-Object System.Windows.Forms.OpenFileDialog
-    $OpenFileDialog.Title = "Open ClipTool Action File"
+    $OpenFileDialog.Title = "Open GregsClipTool Action File"
     $OpenFileDialog.initialDirectory = $script:localpath
     if( Test-Path (Join-Path $script:localpath 'actions') ) {
         $OpenFileDialog.initialDirectory = (Join-Path $script:localpath 'actions')
@@ -2278,9 +2278,9 @@ $Window.ShowDialog() | Out-Null
 
 } # $ClipToolCoreScript
 
-if($NoSeparateRunspace) { # command line option to run ClipTool app IN the PowerShell console
+if($NoSeparateRunspace) { # command line option to run GregsClipTool app IN the PowerShell console
     if(!$psISE) {
-        $Host.UI.RawUI.WindowTitle = "$appTitle - Console Window: DO NOT CLOSE until you are done with ClipTool"
+        $Host.UI.RawUI.WindowTitle = "$appTitle - Console Window: DO NOT CLOSE until you are done with the tool"
     } else {
         # prevent ugly accidents when debugging
         Clear-variable Runspacehash -erroraction silentlycontinue
