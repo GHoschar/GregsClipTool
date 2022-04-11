@@ -1,5 +1,8 @@
 # JSON files in the main folder are personal configuration files (DefaultActions.json, settings.json)
 /*.json
 
+# logs should not be tracked with Git
+logs/**
+
 # reserve local /private folder for GCT actions to export data that will never be tracked with Git
 private/**
