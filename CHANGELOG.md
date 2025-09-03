@@ -14,6 +14,12 @@ Upcoming features and known issues that I plan to address:
 * Allow user to choose if a loaded action with same Action ID overwrites existing one (Yes, No, Yes to all, No to all)
 
 
+## [0.1.24] - 2025-09-02
+### Fixed
+* `Add-Favorite` now stores favorite text using Base64 encoding instead of HTML encoding.
+  - Prevents unintended variable expansion (e.g. `$HOST`) when deploying favorites.
+  - Fully supports multiline text and special characters.
+
 ## [0.1.23] - 2022-04-10
 ### Added
 * The Fields Tab context menu gets two new commands to replace text in 

@@ -18,7 +18,7 @@ Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System
 
 $runningtime =  [system.diagnostics.stopwatch]::StartNew()
 $appTitle = "GregsClipTool"
-$appVersion = [version]'0.1.23'
+$appVersion = [version]'0.1.24'
 if(!$psISE) {
     Write-Host "DO NOT CLOSE THIS WINDOW!"
     Write-Host "`tThis console window hosts the $appTitle application."
@@ -329,11 +329,19 @@ Function Add-Favorite {
     Param(
         [string]$text
     )
+
+    # Pre-encode the raw favorite text so we never have to escape it into the script literal
+    $b64 = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($text))
+
     Edit-Action (Add-ActionButton @{
-        name='Fav'
-        group='Favorites'
-        description="Copy Favorite Text: $text"
-        script="`$text=`"$([System.Web.HttpUtility]::HtmlEncode($text))`";`$script:CopiedText=[System.Web.HttpUtility]::HtmlDecode(`$text);Set-ClipBoardText `$script:CopiedText"
+        name        = 'Fav'
+        group       = 'Favorites'
+        description = "Copy Favorite Text: $text"
+        # Decode at runtime; single-quoted Base64 is safe (no $ expansion, no quotes inside Base64 alphabet)
+        script      = "`$b64='$b64';" +
+                      "`$bytes=[Convert]::FromBase64String(`$b64);" +
+                      "`$script:CopiedText=[Text.Encoding]::UTF8.GetString(`$bytes);" +
+                      "Set-ClipBoardText `$script:CopiedText"
     })
 }
 $allowedCommands += 'Add-Favorite'

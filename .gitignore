@@ -6,3 +6,4 @@ logs/**
 
 # reserve local /private folder for GCT actions to export data that will never be tracked with Git
 private/**
+actions/GPT.json
