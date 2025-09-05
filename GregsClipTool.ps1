@@ -18,7 +18,7 @@ Add-Type -AssemblyName PresentationCore,PresentationFramework,WindowsBase,System
 
 $runningtime =  [system.diagnostics.stopwatch]::StartNew()
 $appTitle = "GregsClipTool"
-$appVersion = [version]'0.1.24'
+$appVersion = [version]'0.1.25'
 if(!$psISE) {
     Write-Host "DO NOT CLOSE THIS WINDOW!"
     Write-Host "`tThis console window hosts the $appTitle application."
@@ -65,6 +65,7 @@ $script:Settings = New-Object PSObject -Property $script:defaultSettings
 
 $script:settingsInitialized = $false
 $script:unsavedSettings = $false #set $true if settings have changed and need to be saved.
+
 <# Alternate expandable group labels suffixes
 $script:expandableLabel = [char]::ConvertFromUtf32(0x2B6D) # downwards triangle-headed dashed arrow
 $script:collapsibleLabel = [char]::ConvertFromUtf32(0x2B71) # upwards triangle-headed arrow to bar
@@ -507,25 +508,39 @@ Function Convert-ActionButtonToHash {
     Param(
         $button
     )
-    #$group = $button.Parent.Parent.Parent # Group > ScrollViewer > WrapPanel > Button
-    $group = Get-ParentGroup $button
-    #Write-Log "Group is $group [$($group.GetType())]"
-    if($group -is [System.Windows.Controls.GroupBox]) {
-        $group = $group.Header -replace $script:collapsibleSuffixes,''
-        #Write-Log "Group was group $group"
-    } else {$group = ''}
-    [ordered]@{
-        name=$button.Content
-        id=$button.Name
-        group=$group
-        color=[string]$button.Background
-        width=$button.Width
-        height=$button.Height
-        hotkey=$script:hotkeys[$button.Name]
-        description=$button.Tooltip
-        script=$button.Tag.toString()
+
+    # Resolve group text safely
+    $groupObj = Get-ParentGroup $button
+    if ($groupObj -is [System.Windows.Controls.GroupBox]) {
+        $group = ($groupObj.Header -as [string]) -replace $script:collapsibleSuffixes, ''
+    } else {
+        $group = ''
     }
-} # Function Convert-ActionButtonToHash
+
+    # Hotkey safe-lookup
+    $hotkey = if ($script:hotkeys.Contains($button.Name)) { $script:hotkeys[$button.Name] } else { $null }
+
+    # Tag/script text safe-cast
+    $scriptText = if ($button.Tag)   { $button.Tag.ToString() }   else { '' }
+
+    # Tooltip may be an object; coerce to string gently
+    $tooltip = if ($null -ne $button.ToolTip) { [string]$button.ToolTip } else { '' }
+
+    # Background may be null (e.g., inherited); coerce to string
+    $color = if ($null -ne $button.Background) { [string]$button.Background } else { '' }
+
+    [ordered]@{
+        name        = $button.Content
+        id          = $button.Name
+        group       = $group
+        color       = $color
+        width       = $button.Width
+        height      = $button.Height
+        hotkey      = $hotkey
+        description = $tooltip
+        script      = $scriptText
+    }
+}
 $allowedCommands += 'Convert-ActionButtonToHash'
 
 function Convert-BytesToHexView {
@@ -918,14 +933,24 @@ Function Save-Actions {
     # list of elements to process for buttons
     
     if($start -is [System.Windows.Controls.Button]) {
-        $actionList.Add((Convert-ActionButtonToHash $start))
+        $actionHash = (Convert-ActionButtonToHash $start)
+        if($actionHash) {
+            $actionList.Add($actionHash)
+        } else {
+            Write-Log "Unable to convert $start to hash."
+        }
     } else {
         $toProcess = Get-AllDescendants $start | ?{$_.name -like "ab_*"} 
         foreach($sp in $toProcess) {
             #Write-Log "Processing $($sp.Name) [$($sp.GetType())]"
             if($sp -is [System.Windows.Controls.Button]) {
                 #Write-Log "Adding button $sp"
-                $actionList += Convert-ActionButtonToHash $sp
+                $actionHash = (Convert-ActionButtonToHash $sp)
+                if($actionHash) {
+                    $actionList.Add($actionHash)
+                } else {
+                    Write-Log "Unable to convert $sp to hash."
+                }
             }
         } # foreach($sp in $toProcess)
     }

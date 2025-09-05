@@ -14,6 +14,10 @@ Upcoming features and known issues that I plan to address:
 * Allow user to choose if a loaded action with same Action ID overwrites existing one (Yes, No, Yes to all, No to all)
 
 
+## [0.1.25] - 2025-09-05
+### Fixed
+* `Convert-ActionButtonToHash` gracefully handles erroneous hotkey and script values.
+
 ## [0.1.24] - 2025-09-02
 ### Fixed
 * `Add-Favorite` now stores favorite text using Base64 encoding instead of HTML encoding.
